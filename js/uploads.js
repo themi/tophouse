@@ -210,6 +210,10 @@ function deletePhoto(albumName, photoKey) {
 }
 
 function deleteAlbum(albumName) {
+    if ( confirm('Delete Album - Are you sure?') != true ) {
+        return false;
+    }
+
     var albumKey = encodeURIComponent(albumName) + "/";
     s3.listObjects({ Prefix: albumKey }, function(err, data) {
         if (err) {
