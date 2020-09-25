@@ -101,7 +101,7 @@ function viewAlbum(albumName) {
                 "<figcaption>",
                 photoKey.replace(albumPhotosKey, ""),
                 "</figcaption>",
-                '<img src="' + photoUrl + '" class="thumbnail"/>',
+                '<img src="' + photoUrl + '" class="thumbnail"/>', //photoHtml(albumBucketName,photoKey,photoUrl),
                 "</figure>",
                 "<button onclick=\"deletePhoto('" +
                 albumName +
@@ -167,21 +167,36 @@ function addPhoto(albumName) {
             Bucket: albumBucketName,
             Key: photoKey,
             Body: file,
-            ACL: "public-read"
+            ACL: "public-read",
+            ContentType: file['type'],
+            ContentLength: file['length']
         }
     });
 
-    var promise = upload.promise();
+    var el = document.getElementById("photoupload");
 
-    promise.then(
-        function(data) {
-            alert("Successfully uploaded photo.");
-            viewAlbum(albumName);
-        },
-        function(err) {
+    upload.on('httpUploadProgress', function(evt) {
+        var uploaded = Math.round(evt.loaded / evt.total * 100);
+        el.nextElementSibling.innerHTML = uploaded + "%"
+    }).send(function(err, data) { console.log(err, data)
+        if (err) {
             return alert("There was an error uploading your photo: ", err.message);
         }
-    );
+        showFileName(el)
+        alert("Successfully uploaded photo.");
+        viewAlbum(albumName);
+    });
+
+    // var promise = upload.promise();
+    // promise.then(
+    //     function(data) {
+    //         alert("Successfully uploaded photo.");
+    //         viewAlbum(albumName);
+    //     },
+    //     function(err) {
+    //         return alert("There was an error uploading your photo: ", err.message);
+    //     }
+    // );
 }
 
 function deletePhoto(albumName, photoKey) {
@@ -216,3 +231,27 @@ function deleteAlbum(albumName) {
         );
     });
 }
+
+
+// function photoHtml(bucket,filename,url) {
+//     var params = {
+//         Bucket: bucket,
+//         Key: filename
+//      };
+//      var result = s3.headObject(params, function(err, data) {
+//         if (err) {
+//             return alert("There was an error getting header data: ", err.message);
+//         }
+//         if (data.ContentType.split("/")[0] == "video") {
+//             return [
+//             "<video controls>",
+//             '<source src="'+url+'" type="'+data.ContentType+'">',
+//             "Your browser does not support the video tag.",
+//             "</video>"
+//             ];
+//         } else {
+//             return ['<img src="' + url + '" class="thumbnail"/>'];
+//         }
+//      });
+//      return getHtml(result);
+// }
