@@ -83,8 +83,8 @@ function createAlbum(albumName) {
 }
 
 function viewAlbum(albumName) {
-    var albumPhotosKey = encodeURIComponent(albumName) + "/";
-    s3.listObjects({ Prefix: albumPhotosKey }, function(err, data) {
+    var albumMediaKey = encodeURIComponent(albumName) + "/";
+    s3.listObjectsV2({ Prefix: albumMediaKey }, function(err, data) {
         if (err) {
             return alert("There was an error viewing your album: " + err.message);
         }
@@ -92,47 +92,53 @@ function viewAlbum(albumName) {
         var href = this.request.httpRequest.endpoint.href;
         var bucketUrl = href + albumBucketName + "/";
 
-        var photos = data.Contents.map(function(photo) {
-            var photoKey = photo.Key;
-            var photoUrl = bucketUrl + encodeURIComponent(photoKey);
-            return getHtml([
+        var mediaObjects = data.Contents.map(function(mediaObject) {
+            var mediaFileName = mediaObject.Key;
+            var mediaUrl = bucketUrl + encodeURIComponent(mediaFileName);
+            var id = keyToId(mediaFileName);
+            var htmlString = getHtml([
                 "<div class='image-slide'>",
                 "<figure>",
                 "<figcaption>",
-                photoKey.replace(albumPhotosKey, ""),
+                mediaFileName.replace(albumMediaKey, ""),
                 "</figcaption>",
-                '<img src="' + photoUrl + '" class="thumbnail"/>', //photoHtml(albumBucketName,photoKey,photoUrl),
+                '<span id="media_'+keyToId(mediaFileName)+'"></span>',
+                createMediaTag(albumBucketName,mediaFileName,mediaUrl),
                 "</figure>",
-                "<button onclick=\"deletePhoto('" +
+                "<button onclick=\"deleteMedia('" +
                 albumName +
                 "','" +
-                photoKey +
+                mediaFileName +
                 "')\" class='btn btn-danger'>",
                 "<i class='fas fa-trash'></i>",
                 "</button>",
                 "</div>"
             ]);
+            return htmlString;
         });
-        var message = photos.length ?
+        var message = mediaObjects.length ?
             "" :
-            "<p>You do not have any photos in this album. Please add photos.</p>";
+            "<p>You do not have any images in this album. Please add some.</p>";
         var htmlTemplate = [
             "<h2>",
                 "Album: " + albumName,
             "</h2>",
             message,
             "<div class='image-container'>",
-                getHtml(photos),
+                getHtml(mediaObjects),
             "</div>",
             '<div class="input-group mb-3 uploader">',
                 '<div class="custom-file">',
-                    '<input type="file" class="custom-file-input" id="photoupload" onchange="showFileName(this)"/>',
-                    '<label class="custom-file-label" for="photoupload" aria-describedby="addphoto">',
+                    '<input type="file" class="custom-file-input" id="upload_media" onchange="showFileName(this)"/>',
+                    '<label class="custom-file-label" for="upload_media" aria-describedby="upload_media_aria">',
                         'Choose file',
                     '</label>',
+                    '<div class="progress-bar">',
+                        '<span id="pgbar" style="width: 0;"></span>',
+                    '</div>',
                 '</div>',
                 '<div class="input-group-append">',
-                    '<button class="input-group-text" id="addphoto" onclick="addPhoto(\'' + albumName + "')\">",
+                    '<button class="input-group-text" id="upload_media_aria" onclick="uploadMedia(\'' + albumName + "')\">",
                     'Upload',
                     '</button>',
                 '</div>',
@@ -145,27 +151,23 @@ function viewAlbum(albumName) {
     });
 }
 
-function showFileName(el) {
-    var fileName = el.value;
-    el.nextElementSibling.innerHTML = fileName;
-}
-
-function addPhoto(albumName) {
-    var files = document.getElementById("photoupload").files;
+function uploadMedia(albumName) {
+    var files = document.getElementById("upload_media").files;
     if (!files.length) {
         return alert("Please choose a file to upload first.");
     }
     var file = files[0];
     var fileName = file.name;
-    var albumPhotosKey = encodeURIComponent(albumName) + "/";
+    var albumMediaKey = encodeURIComponent(albumName) + "/";
 
-    var photoKey = albumPhotosKey + fileName;
+    var mediaFileName = albumMediaKey + fileName;
+    var bar = document.getElementById("pgbar");
 
     // Use S3 ManagedUpload class as it supports multipart uploads
-    var upload = new AWS.S3.ManagedUpload({
+    var uploadRequest = new AWS.S3.ManagedUpload({
         params: {
             Bucket: albumBucketName,
-            Key: photoKey,
+            Key: mediaFileName,
             Body: file,
             ACL: "public-read",
             ContentType: file['type'],
@@ -173,38 +175,28 @@ function addPhoto(albumName) {
         }
     });
 
-    var el = document.getElementById("photoupload");
-
-    upload.on('httpUploadProgress', function(evt) {
+    uploadRequest.on('httpUploadProgress', function(evt) {
         var uploaded = Math.round(evt.loaded / evt.total * 100);
-        el.nextElementSibling.innerHTML = uploaded + "%"
-    }).send(function(err, data) { console.log(err, data)
-        if (err) {
-            return alert("There was an error uploading your photo: ", err.message);
-        }
-        showFileName(el)
-        alert("Successfully uploaded photo.");
-        viewAlbum(albumName);
+        bar.style.width = uploaded+"%";
+        bar.innerHTML = uploaded+"%";
     });
 
-    // var promise = upload.promise();
-    // promise.then(
-    //     function(data) {
-    //         alert("Successfully uploaded photo.");
-    //         viewAlbum(albumName);
-    //     },
-    //     function(err) {
-    //         return alert("There was an error uploading your photo: ", err.message);
-    //     }
-    // );
+    uploadRequest.send(function(error, data) {
+      if (error) {
+        return alert("There was an error uploading your file: ", err.message);
+      } else {
+        alert("Successfully uploaded media file.");
+        viewAlbum(albumName);
+      }
+    });
 }
 
-function deletePhoto(albumName, photoKey) {
-    s3.deleteObject({ Key: photoKey }, function(err, data) {
+function deleteMedia(albumName, mediaFileName) {
+    s3.deleteObject({ Key: mediaFileName }, function(err, data) {
         if (err) {
-            return alert("There was an error deleting your photo: ", err.message);
+            return alert("There was an error deleting your file: ", err.message);
         }
-        alert("Successfully deleted photo.");
+        alert("Successfully deleted file.");
         viewAlbum(albumName);
     });
 }
@@ -236,26 +228,43 @@ function deleteAlbum(albumName) {
     });
 }
 
+function showFileName(el) {
+    var fileName = el.value;
+    el.nextElementSibling.innerHTML = fileName;
+}
 
-// function photoHtml(bucket,filename,url) {
-//     var params = {
-//         Bucket: bucket,
-//         Key: filename
-//      };
-//      var result = s3.headObject(params, function(err, data) {
-//         if (err) {
-//             return alert("There was an error getting header data: ", err.message);
-//         }
-//         if (data.ContentType.split("/")[0] == "video") {
-//             return [
-//             "<video controls>",
-//             '<source src="'+url+'" type="'+data.ContentType+'">',
-//             "Your browser does not support the video tag.",
-//             "</video>"
-//             ];
-//         } else {
-//             return ['<img src="' + url + '" class="thumbnail"/>'];
-//         }
-//      });
-//      return getHtml(result);
-// }
+function keyToId(filename) {
+  return filename.replace('/', '_').replace('.', '_').replace(' ', '_');
+}
+
+function createMediaTag(bucket,filename,url) {
+    var mediaTag = "";
+    var params = {
+        Bucket: bucket,
+        Key: filename
+    };
+    var headerRequest = s3.headObject(params);
+
+    headerRequest.send(function(error, data) {
+      if (error) {
+        // console.log(error.message);
+      } else {
+        if (data.ContentType.split("/")[0] == "video") {
+            mediaTag = getHtml([
+            "<video controls>",
+            '<source src="'+url+'" type="'+data.ContentType+'">',
+            "Your browser does not support the video tag.",
+            "</video>"
+            ]);
+            document.getElementById("media_"+keyToId(filename)).innerHTML = mediaTag;
+        } else {
+            mediaTag = '<img src="'+url+'" class="thumbnail"/>';
+            document.getElementById("media_"+keyToId(filename)).innerHTML = mediaTag;
+        }
+      }
+    });
+
+    Promise.all([headerRequest]);
+
+    return mediaTag;
+}
