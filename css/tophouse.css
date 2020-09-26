@@ -1,3 +1,7 @@
+body {
+  font-family: 'Open Sans', sans-serif;
+}
+
 .honeypot-field,
 .thankyou_message {
     display: none;
@@ -115,7 +119,7 @@ video {
 
 .main .logo {
     color: #FFFFDD;
-    font-family: 'Grand Hotel';
+    font-family: 'Berkshire Swash';
     font-size: 82px;
     position: relative;
     text-align: center;
@@ -124,7 +128,7 @@ video {
 }
 
 .cursive {
-    font-family: 'Grand Hotel', cursive;
+    font-family: 'Berkshire Swash', cursive;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.33);
 }
 
