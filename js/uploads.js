@@ -42,11 +42,12 @@ function listAlbums() {
                 ]) :
                 "<p>You do not have any albums. Please Create album.";
             var htmlTemplate = [
-                "<h2>Albums</h2>",
+                "<h2 class='motto'>Albums</h2>",
                 message,
-                "<ul class='list-group list-group-flush'>",
+                "<ul class='list-group list-group-flush albums'>",
                 getHtml(albums),
                 "</ul>",
+                '</br>',
                 "<button onclick=\"createAlbum(prompt('Enter Album Name:'))\" class='btn btn-primary'>",
                 "Create New Album",
                 "</button>"
@@ -120,7 +121,7 @@ function viewAlbum(albumName) {
             "" :
             "<p>You do not have any images in this album. Please add some.</p>";
         var htmlTemplate = [
-            "<h2>",
+            "<h2 class='motto'>",
                 "Album: " + albumName,
             "</h2>",
             message,

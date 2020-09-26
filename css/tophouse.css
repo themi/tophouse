@@ -40,16 +40,6 @@ h4 {
     flex-direction: row;
 }
 
-.image-slide {
-    flex: none;
-    margin-right: 10px;
-}
-
-.image-slide figure {
-    margin: 0;
-    padding: 0;
-}
-
 img.thumbnail {
     border-radius: 10px;
     border: 1px solid #ddd;
@@ -64,6 +54,20 @@ video {
     border-radius: 4px;
     padding: 5px;
     width: 160px;
+}
+
+.image-slide {
+    flex: none;
+    margin-right: 10px;
+}
+
+.image-slide figure {
+    margin: 0;
+    padding: 0;
+}
+
+ul.albums > li {
+  background-color: #F5DABF;
 }
 
 .progress-bar {
@@ -120,7 +124,6 @@ video {
 .main .logo {
     color: #FFFFDD;
     font-family: 'Berkshire Swash';
-    font-size: 82px;
     position: relative;
     text-align: center;
     margin-top: 150px;
@@ -151,7 +154,6 @@ video {
     width: 100%;
     color: #AAAAAA;
     text-align: right;
-    font-size: 0.8em;
 }
 
 .footer a {
@@ -160,4 +162,36 @@ video {
 
 .footer .heart {
     color: #FF3B30;
+}
+
+/* If the screen size is 601px wide or more, set the font-size of <div> to 80px */
+@media screen and (min-width: 601px) {
+  .main .logo {
+    font-size: 82px;
+  }
+  .main .motto {
+    font-size: 2.1em;
+  }
+  .main .info-text {
+    font-size: 1.6em;
+  }
+  .footer {
+    font-size: 14px;
+  }
+}
+
+/* If the screen size is 600px wide or less, set the font-size of <div> to 30px */
+@media screen and (max-width: 600px) {
+  .main .logo {
+    font-size: 62px;
+  }
+  .main .motto {
+    font-size: 1.6em;
+  }
+  .main .info-text {
+    font-size: 1.1em;
+  }
+  .footer {
+    font-size: 10px;
+  }
 }
