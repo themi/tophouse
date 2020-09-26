@@ -53,6 +53,8 @@ function listAlbums() {
                 "</button>"
             ];
             document.getElementById("app").innerHTML = getHtml(htmlTemplate);
+            // how do you fire .tooltip(); without jquery notation?
+            $('[data-toggle="tooltip"]').tooltip();
         }
     });
 }
@@ -106,12 +108,14 @@ function viewAlbum(albumName) {
                 '<span id="media_'+keyToId(mediaFileName)+'"></span>',
                 createMediaTag(albumBucketName,mediaFileName,mediaUrl),
                 "</figure>",
-                "<button onclick=\"deleteMedia('" +
-                albumName +
-                "','" +
-                mediaFileName +
-                "')\" class='btn btn-danger'>",
+                "<button onclick=\"deleteMedia('" + albumName + "','" + mediaFileName + "')\" class='btn btn-danger media-btn'>",
                 "<i class='fas fa-trash'></i>",
+                "</button>",
+                "<button onclick=\"editDesc('" + albumName + "','" + mediaFileName + "')\" id='description_"+keyToId(mediaFileName)+"' data-toggle='tooltip' data-placement='top' class='btn btn-success media-btn'>",
+                "<i class='fas fa-book-open'></i>",
+                "</button>",
+                "<button onclick=\"editHTag('" + albumName + "','" + mediaFileName + "')\" id='hashtags_"+keyToId(mediaFileName)+"' data-toggle='tooltip' data-placement='top' class='btn btn-info media-btn'>",
+                "<i class='fas fa-hashtag'></i>",
                 "</button>",
                 "</div>"
             ]);
@@ -149,6 +153,8 @@ function viewAlbum(albumName) {
             '</button>'
         ];
         document.getElementById("app").innerHTML = getHtml(htmlTemplate);
+        // how do you fire .tooltip(); without jquery notation?
+        $('[data-toggle="tooltip"]').tooltip();
     });
 }
 
@@ -186,7 +192,6 @@ function uploadMedia(albumName) {
       if (error) {
         return alert("There was an error uploading your file: ", err.message);
       } else {
-        alert("Successfully uploaded media file.");
         viewAlbum(albumName);
       }
     });
@@ -238,10 +243,41 @@ function keyToId(filename) {
   return filename.replace('/', '_').replace('.', '_').replace(' ', '_');
 }
 
-function createMediaTag(bucket,filename,url) {
-    var mediaTag = "";
+function createMediaTag(bucketName,filename,url) {
+    var headerRequest = getMediaHeaders(bucketName,filename,url);
+    var tagsRequest = getMediaTags(bucketName,filename);
+
+    Promise.all([headerRequest, tagsRequest]).then(function(values) {
+        // yeah nah dont do anything just yet
+    });
+
+    return '';
+}
+
+function editDesc(bucketName,filename) {
+    // todo
+}
+
+function editHTag(bucketName,filename) {
+    // todo
+}
+
+function searchTagsByKey(tags, key) {
+    var found = null;
+    for (var i = 0; i < tags.length; i++) {
+        var element = tags[i];
+
+        if (element.Key == key) {
+           found = element.Value;
+       }
+    }
+    if (found == null) return "No "+key;
+    return found;
+}
+
+function getMediaHeaders(bucketName,filename,url) {
     var params = {
-        Bucket: bucket,
+        Bucket: bucketName,
         Key: filename
     };
     var headerRequest = s3.headObject(params);
@@ -264,8 +300,44 @@ function createMediaTag(bucket,filename,url) {
         }
       }
     });
+    return headerRequest;
+}
 
-    Promise.all([headerRequest]);
+function getMediaTags(bucketName,filename) {
+    var params = {
+        Bucket: bucketName,
+        Key: filename
+     };
 
-    return mediaTag;
+     var tagsRequest = s3.getObjectTagging(params);
+
+     tagsRequest.send(function(err, data) {
+        if (err) {
+            // console.log(err, err.stack); // an error occurred
+        } else {
+            var desc = searchTagsByKey(data.TagSet, "Description")
+            document.getElementById("description_"+keyToId(filename)).setAttribute("data-original-title", desc);
+
+            var htag = searchTagsByKey(data.TagSet, "Hashtags")
+            document.getElementById("hashtags_"+keyToId(filename)).setAttribute("data-original-title", htag);
+        }
+     });
+     return tagsRequest;
+}
+
+function saveMediaTags(bucketName,key,description,hashTags) {
+    var params = {
+        Bucket: bucketName,
+        Key: key,
+        Tagging: {
+        TagSet: [
+          { Key: "Description", Value: description },
+          { Key: "Hashtags", Value: hashTags }
+        ]
+        }
+    };
+    s3.putObjectTagging(params, function(err, data) {
+       if (err) console.log(err, err.stack); // an error occurred
+       else     console.log(data);           // successful response
+    });
 }

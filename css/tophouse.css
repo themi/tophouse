@@ -35,11 +35,6 @@ h4 {
     margin: 30px 0 15px;
 }
 
-.image-container {
-    display: flex;
-    flex-direction: row;
-}
-
 img.thumbnail {
     border-radius: 10px;
     border: 1px solid #ddd;
@@ -48,12 +43,29 @@ img.thumbnail {
     width: 110px;
 }
 
+ul.albums > li {
+  background-color: #F5DABF;
+}
+
 video {
     border-radius: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 5px;
-    width: 160px;
+    width: 180px;
+}
+
+figcaption, p {
+    color: #FFFFFF;
+}
+
+figcaption {
+    text-align: center;
+}
+
+.image-container {
+    display: flex;
+    flex-direction: row;
 }
 
 .image-slide {
@@ -66,8 +78,12 @@ video {
     padding: 0;
 }
 
-ul.albums > li {
-  background-color: #F5DABF;
+.media-btn {
+  padding: 4px 8px;
+}
+
+.media-btn i {
+  font-size: 0.8em;
 }
 
 .progress-bar {
