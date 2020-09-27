@@ -82,7 +82,7 @@ function mediaTagsForm(bucketName, filename, description, hashtags) {
         const thisModal = $('#' + id);
         const desc = thisModal.find('#description').val();
         const htags = thisModal.find('#hashtags').val();
-        alert("Description:"+desc+" Hashtags: "+htags+ "\nFeature not working just yet.");
+        alert("Description:"+desc+"\nHashtags: "+htags+ "\n\nApologies, this feature not working just yet.");
         // const request = setMediaTags(bucketName, filename, desc, htags)
         // Promise.all([request]);
         thisModal.modal('hide');
