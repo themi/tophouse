@@ -1,4 +1,5 @@
 var albumBucketName = "hemi-uploads";
+var albumPlaceHolder = "_manifest";
 
 var s3 = new AWS.S3({
     apiVersion: "2006-03-01",
@@ -56,7 +57,7 @@ function createAlbum(albumName) {
     if (albumName.indexOf("/") !== -1) {
         return alert("Album names cannot contain slashes.");
     }
-    var albumKey = encodeURIComponent(albumName);
+    var albumKey = encodeURIComponent(albumName) + "/" + albumPlaceHolder;
     s3.headObject({ Key: albumKey }, function(err, data) {
         if (!err) {
             return alert("Album already exists.");
@@ -76,6 +77,7 @@ function createAlbum(albumName) {
 
 function viewAlbum(albumName) {
     var albumMediaKey = encodeURIComponent(albumName) + "/";
+    var placeHolderKey = albumMediaKey + albumPlaceHolder;
     s3.listObjectsV2({ Prefix: albumMediaKey }, function(err, data) {
         if (err) {
             return alert("There was an error viewing your album: " + err.message);
@@ -84,7 +86,12 @@ function viewAlbum(albumName) {
         var href = this.request.httpRequest.endpoint.href;
         var bucketUrl = href + albumBucketName + "/";
 
-        var mediaObjects = data.Contents.map(function(mediaObject) {
+        var mediaObjects = data.Contents.filter(function(mediaObject) {
+            if (mediaObject.Key === placeHolderKey) {
+                return false; // skip the placeholder
+            }
+            return true;
+        }).map(function(mediaObject) {
             var mediaFileName = mediaObject.Key;
             var mediaUrl = bucketUrl + encodeURIComponent(mediaFileName);
             var id = keyToId(mediaFileName);
@@ -319,7 +326,8 @@ function setMediaTags(bucketName, filename, description, hashtags) {
     tagsRequest.send(function(err, data) {
         if (err) {
             alert(err.message)
-        } else {console.log(data)
+        } else {
+            console.log(data)
             renderMediaTags(filename, description, hashtags);
         };
     });
