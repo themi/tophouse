@@ -1,11 +1,3 @@
-var albumBucketName = "hemi-uploads";
-var albumPlaceHolder = "_manifest";
-
-var s3 = new AWS.S3({
-    apiVersion: "2006-03-01",
-    params: { Bucket: albumBucketName }
-});
-
 function listAlbums() {
     s3.listObjects({ Delimiter: "/" }, function(err, data) {
         if (err) {
@@ -128,22 +120,10 @@ function viewAlbum(albumName) {
             "<div class='image-container'>",
             getHtml(mediaObjects),
             "</div>",
-            '<div class="input-group mb-3 uploader">',
-            '<div class="custom-file">',
-            '<input type="file" class="custom-file-input" id="upload_media" onchange="showFileName(this)"/>',
-            '<label class="custom-file-label" for="upload_media" aria-describedby="upload_media_aria">',
-            'Choose file',
-            '</label>',
-            '<div class="progress-bar">',
-            '<span id="pgbar" style="width: 0;"></span>',
-            '</div>',
-            '</div>',
-            '<div class="input-group-append">',
-            '<button class="input-group-text" id="upload_media_aria" onclick="uploadMedia(\'' + albumName + "')\">",
-            'Upload',
+            "</br>",
+            '<button onclick="uploadMediaForm(\'' + albumName + '\')" class="btn btn-primary">',
+            'Upload File',
             '</button>',
-            '</div>',
-            '</div>',
             '<button onclick="listAlbums()" class="btn btn-primary">',
             'Back To Albums',
             '</button>'
@@ -154,94 +134,13 @@ function viewAlbum(albumName) {
     });
 }
 
-function uploadMedia(albumName) {
-    var files = document.getElementById("upload_media").files;
-    if (!files.length) {
-        return alert("Please choose a file to upload first.");
-    }
-    var file = files[0];
-    var fileName = file.name;
-    var albumMediaKey = encodeURIComponent(albumName) + "/";
-
-    var mediaFileName = albumMediaKey + fileName;
-    var bar = document.getElementById("pgbar");
-
-    // Use S3 ManagedUpload class as it supports multipart uploads
-    var uploadRequest = new AWS.S3.ManagedUpload({
-        params: {
-            Bucket: albumBucketName,
-            Key: mediaFileName,
-            Body: file,
-            ACL: "public-read",
-            ContentType: file['type'],
-            ContentLength: file['length']
-        }
-    });
-
-    uploadRequest.on('httpUploadProgress', function(evt) {
-        var uploaded = Math.round(evt.loaded / evt.total * 100);
-        bar.style.width = uploaded + "%";
-        bar.innerHTML = uploaded + "%";
-    });
-
-    uploadRequest.send(function(error, data) {
-        if (error) {
-            return alert("There was an error uploading your file: ", err.message);
-        } else {
-            viewAlbum(albumName);
-        }
-    });
-}
-
-function deleteMedia(albumName, mediaFileName) {
-    s3.deleteObject({ Key: mediaFileName }, function(err, data) {
-        if (err) {
-            return alert("There was an error deleting your file: ", err.message);
-        }
-        alert("Successfully deleted file.");
-        viewAlbum(albumName);
-    });
-}
-
-function deleteAlbum(albumName) {
-    if (confirm('Delete Album - Are you sure?') != true) {
-        return false;
-    }
-
-    var albumKey = encodeURIComponent(albumName) + "/";
-    s3.listObjects({ Prefix: albumKey }, function(err, data) {
-        if (err) {
-            return alert("There was an error deleting your album: ", err.message);
-        }
-        var objects = data.Contents.map(function(object) {
-            return { Key: object.Key };
-        });
-        s3.deleteObjects({
-                Delete: { Objects: objects, Quiet: true }
-            },
-            function(err, data) {
-                if (err) {
-                    return alert("There was an error deleting your album: ", err.message);
-                }
-                alert("Successfully deleted album.");
-                listAlbums();
-            }
-        );
-    });
-}
-
-function showFileName(el) {
-    var fileName = el.value;
-    el.nextElementSibling.innerHTML = fileName;
-}
-
 function keyToId(filename) {
     return filename.replace('/', '_').replace('.', '_').replace(' ', '_');
 }
 
 function createMediaTag(bucketName, filename, url) {
-    var headerRequest = getMediaHeaders(bucketName, filename, url);
-    var tagsRequest = getMediaTags(bucketName, filename);
+    var headerRequest = renderMediaHtml(bucketName, filename, url);
+    var tagsRequest = downloadTagging(bucketName, filename);
 
     Promise.all([headerRequest, tagsRequest]).then(function(values) {
         // yeah nah dont do anything just yet
@@ -250,7 +149,7 @@ function createMediaTag(bucketName, filename, url) {
     return '';
 }
 
-function getMediaHeaders(bucketName, filename, url) {
+function renderMediaHtml(bucketName, filename, url) {
     var params = {
         Bucket: bucketName,
         Key: filename
@@ -284,65 +183,7 @@ function editMediaTags(bucketName, filename) {
     mediaTagsForm(bucketName, filename, desc, htags);
 }
 
-function renderMediaTags(filename, description, hashtags) {
+function renderMediaTagging(filename, description, hashtags) {
     document.getElementById("description_" + keyToId(filename)).setAttribute("data-original-title", description);
     document.getElementById("hashtags_" + keyToId(filename)).setAttribute("data-original-title", hashtags);
-}
-
-function getMediaTags(bucketName, filename) {
-    var params = {
-        Bucket: bucketName,
-        Key: filename
-    };
-
-    var tagsRequest = s3.getObjectTagging(params);
-
-    tagsRequest.send(function(err, data) {
-        if (err) {
-            // console.log(err, err.stack); // an error occurred
-        } else {
-            var desc = searchTagsByKey(data.TagSet, "Description")
-            var htags = searchTagsByKey(data.TagSet, "Hashtags")
-            renderMediaTags(filename, desc, htags);
-        }
-    });
-    return tagsRequest;
-}
-
-function setMediaTags(bucketName, filename, description, hashtags) {
-    var params = {
-        Bucket: bucketName,
-        Key: filename,
-        Tagging: {
-            TagSet: [
-                { Key: "Description", Value: description },
-                { Key: "Hashtags", Value: hashtags }
-            ]
-        }
-    };
-
-    var tagsRequest = s3.putObjectTagging(params);
-
-    tagsRequest.send(function(err, data) {
-        if (err) {
-            alert(err.message)
-        } else {
-            console.log(data)
-            renderMediaTags(filename, description, hashtags);
-        };
-    });
-    return tagsRequest;
-}
-
-function searchTagsByKey(tags, key) {
-    var found = null;
-    for (var i = 0; i < tags.length; i++) {
-        var element = tags[i];
-
-        if (element.Key == key) {
-            found = element.Value;
-        }
-    }
-    if (found == null) return "No " + key;
-    return found;
 }

@@ -10,6 +10,11 @@ function getHtml(template) {
     return template.join('\n');
 }
 
+function showFileName(el) {
+    var fileName = el.value;
+    el.nextElementSibling.innerHTML = fileName;
+}
+
 //********************
 // START TEMPLATE AREA
 //********************
@@ -45,9 +50,10 @@ function modalDefaultHeader(title) {
     return htmlString;
 }
 
-function modalDefaultFooter() {
+function modalDefaultFooter(saveText) {
+    if (saveText == null) saveText = "Save changes";
     const htmlString = getHtml([
-        '<button type="button" class="btn btn-primary modal-save-button">Save changes</button>',
+        '<button type="button" class="btn btn-primary modal-save-button">' + saveText + '</button>',
         '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>',
     ]);
     return htmlString;
@@ -60,7 +66,7 @@ function modalDefaultFooter() {
 
 
 function mediaTagsForm(bucketName, filename, description, hashtags) {
-    const htmlString = getHtml([
+    const context = getHtml([
         '<form>',
         '<div class="form-group">',
         '<label for="description" class="col-form-label">Description:</label>',
@@ -73,26 +79,82 @@ function mediaTagsForm(bucketName, filename, description, hashtags) {
         '</form>',
     ]);
     const id = "media_tags_dialog"
-    const dialogString = modalBase(id, modalDefaultHeader('Media Tags'), htmlString, modalDefaultFooter());
+    const dialogString = modalBase(id, modalDefaultHeader('Media Tags'), context, modalDefaultFooter());
 
     renderModal(dialogString);
+    var thisModal = document.getElementById(id);
 
     // save action
-    $('#' + id + ' .modal-save-button').on('click', function() {
-        const thisModal = $('#' + id);
-        const desc = thisModal.find('#description').val();
-        const htags = thisModal.find('#hashtags').val();
-        alert("Description:"+desc+"\nHashtags: "+htags+ "\n\nApologies, this feature not working just yet.");
-        // const request = setMediaTags(bucketName, filename, desc, htags)
-        // Promise.all([request]);
-        thisModal.modal('hide');
+    thisModal.querySelector('.modal-save-button').addEventListener('click', function() {
+        const desc = thisModal.querySelector('#description').value;
+        const htags = thisModal.querySelector('#hashtags').value;
+        alert("Description:" + desc + "\nHashtags: " + htags + "\n\nApologies, this feature not working just yet.");
+        $(thisModal).modal('hide');
     });
 
     // when opened set focus to description input
-    $('#' + id).on('shown.bs.modal', function() {
-        $('#description').trigger('focus')
+    thisModal.addEventListener('shown.bs.modal', function() {
+        thisModal.querySelector('#description').trigger('focus')
     });
 
-    // open the media tags form
-    $('#' + id).modal({ backdrop: false });
+    // open the tagging form
+    $(thisModal).modal({ backdrop: false });
+}
+
+function uploadMediaForm(albumName) {
+    const htmlString = getHtml([
+        '<form>',
+        '<div class="input-group mb-3 uploader">',
+        '<div class="custom-file">',
+        '<input type="file" class="custom-file-input" id="upload_media" onchange="showFileName(this)"/>',
+        '<label class="custom-file-label" for="upload_media" aria-describedby="upload_media_aria">',
+        'Choose file',
+        '</label>',
+        '<div class="progress-bar">',
+        '<span id="pgbar" style="width: 0;"></span>',
+        '</div>',
+        '</div>',
+        '</div>',
+        '<div class="form-group">',
+        '<label for="description" class="col-form-label">Description:</label>',
+        '<input type="text" class="form-control" id="description">',
+        '</div>',
+        '<div class="form-group">',
+        '<label for="hashtags" class="col-form-label">Hashtags:</label>',
+        '<textarea class="form-control" id="hashtags"></textarea>',
+        '</div>',
+        '</form>',
+    ]);
+    const id = "upload_media_dialog"
+    const dialogString = modalBase(id, modalDefaultHeader('Upload File'), htmlString, modalDefaultFooter('Upload'));
+
+    renderModal(dialogString);
+
+    var thisModal = document.getElementById(id);
+
+    // save action
+    thisModal.querySelector(".modal-save-button").addEventListener("click", function() {
+        var bar = thisModal.querySelector("#pgbar");
+        var desc = thisModal.querySelector("#description").value;
+        var htags = thisModal.querySelector("#hashtags").value;
+        var files = thisModal.querySelector("#upload_media").files;
+
+        if (!files.length) {
+            alert("Please choose a file to upload first.");
+        } else {
+            var fileObject = files[0];
+            var fileRequest = uploadMedia(albumName, fileObject, bar);
+            // wait for object to exist! then...
+            // var taggingRequest = uploadTagging(albumBucketName, fileObject.name, description, hashtags);
+            $(thisModal).modal('hide');
+        }
+    });
+
+    // when opened, set focus to description field
+    thisModal.addEventListener("shown.bs.modal", function() {
+        thisModal.querySelector("#description").focus();
+    });
+
+    // open the upload form
+    $(thisModal).modal({ backdrop: false });
 }
