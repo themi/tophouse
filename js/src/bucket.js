@@ -82,7 +82,7 @@ function viewAlbum(albumName) {
                 mediaFileName.replace(albumMediaKey, ""),
                 "</figcaption>",
                 '<span id="media_' + keyToId(mediaFileName) + '"></span>',
-                createMediaTag(albumBucketName, mediaFileName, mediaUrl),
+                createMediaHtml(albumBucketName, mediaFileName, mediaUrl),
                 "</figure>",
                 "<button onclick=\"deleteMedia('" + albumName + "','" + mediaFileName + "')\" class='btn btn-danger media-btn'>",
                 "<i class='fas fa-trash'></i>",
@@ -122,6 +122,12 @@ function viewAlbum(albumName) {
     });
 }
 
+function uploadMedia(albumName, file, progressBar) {
+    requestUploadMedia(albumName, file, progressBar, function(data){
+        viewAlbum(albumName);
+    });
+}
+
 function deleteMedia(albumName, fileName) {
     requestDeleteMedia(fileName, function(data) {
         alert("Successfully deleted file.");
@@ -130,7 +136,7 @@ function deleteMedia(albumName, fileName) {
 }
 
 function renderMediaHtml(bucketName, filename, url) {
-    requestObjectHeaders(bucketName, filename, function(data) {
+    return requestObjectHeaders(bucketName, filename, function(data) {
         if (data.ContentType.split("/")[0] == "video") {
             mediaTag = getHtml([
                 "<video controls>",
@@ -150,15 +156,16 @@ function keyToId(filename) {
     return filename.replace('/', '_').replace('.', '_').replace(' ', '_');
 }
 
-function createMediaTag(bucketName, filename, url) {
+function createMediaHtml(bucketName, filename, url) {
     var headerRequest = renderMediaHtml(bucketName, filename, url);
-    var tagsRequest = downloadTagging(bucketName, filename);
 
-    Promise.all([headerRequest, tagsRequest]).then(function(values) {
-        // yeah nah dont do anything just yet
+    taggingRequest = requestObjectsTags(bucketName, filename, function(data){
+        var description = searchTagsByKey(data.TagSet, "Description")
+        var hashtags = searchTagsByKey(data.TagSet, "Hashtags")
+        renderMediaTagging(filename, description, hashtags);
     });
 
-    return '';
+    Promise.all([headerRequest, taggingRequest])
 }
 
 function editMediaTags(bucketName, filename) {

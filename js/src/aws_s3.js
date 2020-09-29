@@ -13,12 +13,12 @@ var s3 = new AWS.S3({
     params: { Bucket: albumBucketName }
 });
 
-function uploadMedia(albumName, file, progressBar) {
+function requestUploadMedia(albumName, file, progressBar, callback) {
     var albumMediaKey = encodeURIComponent(albumName) + "/";
 
     var mediaFileName = albumMediaKey + file.name;
 
-    var uploadRequest = new AWS.S3.ManagedUpload({
+    var request = new AWS.S3.ManagedUpload({
         params: {
             Bucket: albumBucketName,
             Key: mediaFileName,
@@ -29,24 +29,24 @@ function uploadMedia(albumName, file, progressBar) {
         }
     });
 
-    uploadRequest.on('httpUploadProgress', function(evt) {
+    request.on('httpUploadProgress', function(evt) {
         var uploaded = Math.round(evt.loaded / evt.total * 100);
         progressBar.style.width = uploaded + "%";
         progressBar.innerHTML = uploaded + "%";
     });
 
-    uploadRequest.send(function(error, data) {
+    request.send(function(error, data) {
         if (error) {
             return alert("There was an error uploading your file: ", error.message);
         } else {
-            viewAlbum(albumName);
+            callback(data);
         }
     });
 
-    return uploadRequest;
+    return request;
 }
 
-function uploadTagging(bucketName, filename, description, hashtags) {
+function requestPutObjectsTags(bucketName, filename, description, hashtags, callback) {
     var params = {
         Bucket: bucketName,
         Key: filename,
@@ -63,38 +63,35 @@ function uploadTagging(bucketName, filename, description, hashtags) {
         }
     };
 
-    var uploadRequest = s3.putObjectTagging(params);
+    var request = s3.putObjectTagging(params);
 
-    uploadRequest.send(function(error, data) {
+    request.send(function(error, data) {
         if (error) {
-            alert(error.message)
-        } else {
-            console.log(data)
-            renderMediaTagging(filename, description, hashtags);
-        };
+            return alert(error.message);
+        }
+        callback(data);
     });
-    return uploadRequest;
+
+    return request;
 }
 
-function downloadTagging(bucketName, filename) {
+function requestObjectsTags(bucketName, filename, callback) {
     var params = {
         Bucket: bucketName,
         Key: filename
     };
 
-    var downloadRequest = s3.getObjectTagging(params);
+    var request = s3.getObjectTagging(params);
 
-    downloadRequest.send(function(error, data) {
+    request.send(function(error, data) {
         if (error) {
             // console.log(error, error.stack); // an error occurred
         } else {
-            var description = searchTagsByKey(data.TagSet, "Description")
-            var hashtags = searchTagsByKey(data.TagSet, "Hashtags")
-            renderMediaTagging(filename, description, hashtags);
+            callback(data);
         }
     });
 
-    return downloadRequest;
+    return request;
 }
 
 

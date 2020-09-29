@@ -145,7 +145,10 @@ function uploadMediaForm(albumName) {
             var fileObject = files[0];
             var fileRequest = uploadMedia(albumName, fileObject, bar);
             // wait for object to exist! then...
-            // var taggingRequest = uploadTagging(albumBucketName, fileObject.name, description, hashtags);
+            // requestPutObjectsTags(bucketName, filename, description, hashtags, function(data){
+            //     renderMediaTagging(filename, description, hashtags);
+            // });
+
             $(thisModal).modal('hide');
         }
     });
