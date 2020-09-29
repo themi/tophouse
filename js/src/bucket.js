@@ -52,6 +52,7 @@ function createAlbum(albumName) {
     });
 }
 
+// [TODO] fix race condition when deleting then listing
 function deleteAlbum(albumName) {
     if (confirm('Delete Album - Are you sure?') != true) {
         return false;
@@ -165,7 +166,8 @@ function createMediaHtml(bucketName, filename, url) {
         renderMediaTagging(filename, description, hashtags);
     });
 
-    Promise.all([headerRequest, taggingRequest])
+    // must complete above actions before return
+    Promise.all([headerRequest, taggingRequest]);
 }
 
 function editMediaTags(bucketName, filename) {
