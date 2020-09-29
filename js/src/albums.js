@@ -50,7 +50,7 @@ function createAlbum(albumName) {
     });
 }
 
-// [TODO] fix race condition when deleting then listing
+// [TODO] fix race condition when deleting and listing
 function deleteAlbum(albumName) {
     if (confirm('Delete Album - Are you sure?') != true) {
         return false;
@@ -86,10 +86,10 @@ function viewAlbum(albumName) {
                 "<button onclick=\"deleteMedia('" + albumName + "','" + mediaFileName + "')\" class='btn btn-danger media-btn'>",
                 "<i class='fas fa-trash'></i>",
                 "</button>",
-                "<button onclick=\"editMediaTags('" + albumName + "','" + mediaFileName + "')\" id='description_" + keyToId(mediaFileName) + "' data-toggle='tooltip' data-placement='top' class='btn btn-success media-btn'>",
+                "<button onclick=\"editMediaTagging('" + albumName + "','" + mediaFileName + "')\" id='description_" + keyToId(mediaFileName) + "' data-toggle='tooltip' data-placement='top' class='btn btn-success media-btn'>",
                 "<i class='fas fa-book-open'></i>",
                 "</button>",
-                "<button onclick=\"editMediaTags('" + albumName + "','" + mediaFileName + "')\" id='hashtags_" + keyToId(mediaFileName) + "' data-toggle='tooltip' data-placement='top' class='btn btn-info media-btn'>",
+                "<button onclick=\"editMediaTagging('" + albumName + "','" + mediaFileName + "')\" id='hashtags_" + keyToId(mediaFileName) + "' data-toggle='tooltip' data-placement='top' class='btn btn-info media-btn'>",
                 "<i class='fas fa-hashtag'></i>",
                 "</button>",
                 "</div>"
@@ -166,7 +166,7 @@ function createMediaHtml(bucketName, filename, url) {
     Promise.all([headerRequest, taggingRequest]);
 }
 
-function editMediaTags(bucketName, filename) {
+function editMediaTagging(bucketName, filename) {
     var desc = document.getElementById("description_" + keyToId(filename)).getAttribute("data-original-title");
     var htags = document.getElementById("hashtags_" + keyToId(filename)).getAttribute("data-original-title");
     mediaTagsForm(bucketName, filename, desc, htags);

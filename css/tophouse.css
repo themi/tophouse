@@ -65,7 +65,7 @@ figcaption {
 
 .image-container {
     display: flex;
-    flex-direction: row;
+    flex-flow: row wrap;
 }
 
 .image-slide {
