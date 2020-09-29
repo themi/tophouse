@@ -97,11 +97,63 @@ function downloadTagging(bucketName, filename) {
     return downloadRequest;
 }
 
-function deleteAlbum(albumName) {
-    if (confirm('Delete Album - Are you sure?') != true) {
-        return false;
-    }
 
+function requestObjectHeaders(bucketName, filename, callback) {
+    var params = {
+        Bucket: bucketName,
+        Key: filename
+    };
+    var request = s3.headObject(params);
+
+    request.send(function(error, data) {
+        if (error) {
+            // console.log(error.message);
+        } else {
+            callback(data)
+        }
+    });
+    return request;
+}
+
+function requestViewAlbum(albumMediaKey, callback) {
+    var placeHolderKey = albumMediaKey + albumPlaceHolder;
+    var params = { Prefix: albumMediaKey };
+    var request = s3.listObjectsV2(params);
+    request.send(function(error, data) {
+        if (error) {
+            return alert("There was an error viewing your album: " + error.message);
+        }
+        // 'this' references the AWS.Response instance that represents the response
+        var href = this.request.httpRequest.endpoint.href;
+        var bucketUrl = href + albumBucketName + "/";
+        callback(data, placeHolderKey, bucketUrl);
+    });
+    return request;
+}
+
+function requestCreateAlbum(albumName, callback) {
+    var albumKey = encodeURIComponent(albumName) + "/" + albumPlaceHolder;
+
+    var params = { Key: albumKey };
+    var request = s3.headObject(params);
+    request.send( function(error, data) {
+        if (!error) {
+            return alert("Album already exists.");
+        }
+        if (error.code !== "NotFound") {
+            return alert("There was an error creating your album: " + error.message);
+        }
+        s3.putObject({ Key: albumKey }, function(error, data) {
+            if (error) {
+                return alert("There was an error creating your album: " + error.message);
+            }
+            callback(data);
+        });
+    });
+    return request;
+}
+
+function requestDeleteAlbum(albumName, callback) {
     var albumKey = encodeURIComponent(albumName) + "/";
 
     var params = { Prefix: albumKey };
@@ -127,31 +179,42 @@ function deleteAlbum(albumName) {
                 if (error) {
                     return alert("There was an error deleting your album: ", error.message);
                 }
-                alert("Successfully deleted album.");
-                listAlbums();
+                callback(data);
             }
         );
     });
     return deleteRequest;
 }
 
-
-function deleteMedia(albumName, fileName) {
+function requestDeleteMedia(fileName, callback) {
     var params = {
         Key: fileName
     };
 
-    var deleteRequest = s3.deleteObject(params);
+    var request = s3.deleteObject(params);
 
-    deleteRequest.send(function(error, data) {
+    request.send(function(error, data) {
         if (error) {
             return alert("There was an error deleting your file: ", error.message);
         }
-        alert("Successfully deleted file.");
-        viewAlbum(albumName);
+        callback(data)
     });
 
-    return deleteRequest;
+    return request;
+}
+
+function requestAlbumNames(callback) {
+    var params = { Delimiter: "/" };
+
+    var request = s3.listObjectsV2(params);
+
+    request.send( function(error, data) {
+        if (error) {
+            return alert("There was an error listing your albums: " + error.message);
+        }
+        callback(data);
+    });
+    return request;
 }
 
 
