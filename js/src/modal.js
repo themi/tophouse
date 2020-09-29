@@ -1,16 +1,22 @@
-function renderPage(page) {
+function renderPage(page, callaback) {
     document.getElementById("app").innerHTML = page;
+    callaback;
+    $('[data-toggle="tooltip"]').tooltip();
 }
 
-function renderModal(page) {
+function renderModal(id, page, callback) {
     document.getElementById("modals").innerHTML = page;
+    var thisModal = document.getElementById(id);
+    callback(thisModal);
+    $('[data-toggle="tooltip"]').tooltip();
+    $(thisModal).modal({ backdrop: false });
 }
 
 function getHtml(template) {
     return template.join('\n');
 }
 
-function showFileName(el) {
+function assertFileName(el) {
     var fileName = el.value;
     el.nextElementSibling.innerHTML = fileName;
 }
@@ -81,24 +87,19 @@ function mediaTagsForm(bucketName, filename, description, hashtags) {
     const id = "media_tags_dialog"
     const dialogString = modalBase(id, modalDefaultHeader('Media Tags'), context, modalDefaultFooter());
 
-    renderModal(dialogString);
-    var thisModal = document.getElementById(id);
+    renderModal(id, dialogString, function(thisModal){
 
-    // save action
-    thisModal.querySelector('.modal-save-button').addEventListener('click', function() {
-        const desc = thisModal.querySelector('#description').value;
-        const htags = thisModal.querySelector('#hashtags').value;
-        alert("Description:" + desc + "\nHashtags: " + htags + "\n\nApologies, this feature not working just yet.");
-        $(thisModal).modal('hide');
+        thisModal.querySelector('.modal-save-button').addEventListener('click', function() {
+            const desc = thisModal.querySelector('#description').value;
+            const htags = thisModal.querySelector('#hashtags').value;
+            alert("Description:" + desc + "\nHashtags: " + htags + "\n\nApologies, this feature not working just yet.");
+            $(thisModal).modal('hide');
+        });
+
+        thisModal.addEventListener('shown.bs.modal', function() {
+            thisModal.querySelector('#description').trigger('focus')
+        });
     });
-
-    // when opened set focus to description input
-    thisModal.addEventListener('shown.bs.modal', function() {
-        thisModal.querySelector('#description').trigger('focus')
-    });
-
-    // open the tagging form
-    $(thisModal).modal({ backdrop: false });
 }
 
 function uploadMediaForm(albumName) {
@@ -106,7 +107,7 @@ function uploadMediaForm(albumName) {
         '<form>',
         '<div class="input-group mb-3 uploader">',
         '<div class="custom-file">',
-        '<input type="file" class="custom-file-input" id="upload_media" onchange="showFileName(this)"/>',
+        '<input type="file" class="custom-file-input" id="upload_media" onchange="assertFileName(this)"/>',
         '<label class="custom-file-label" for="upload_media" aria-describedby="upload_media_aria">',
         'Choose file',
         '</label>',
@@ -128,36 +129,31 @@ function uploadMediaForm(albumName) {
     const id = "upload_media_dialog"
     const dialogString = modalBase(id, modalDefaultHeader('Upload File'), htmlString, modalDefaultFooter('Upload'));
 
-    renderModal(dialogString);
+    renderModal(id, dialogString, function(thisModal){
 
-    var thisModal = document.getElementById(id);
+        thisModal.querySelector(".modal-save-button").addEventListener("click", function() {
+            var bar = thisModal.querySelector("#pgbar");
+            var desc = thisModal.querySelector("#description").value;
+            var htags = thisModal.querySelector("#hashtags").value;
+            var files = thisModal.querySelector("#upload_media").files;
 
-    // save action
-    thisModal.querySelector(".modal-save-button").addEventListener("click", function() {
-        var bar = thisModal.querySelector("#pgbar");
-        var desc = thisModal.querySelector("#description").value;
-        var htags = thisModal.querySelector("#hashtags").value;
-        var files = thisModal.querySelector("#upload_media").files;
+            if (!files.length) {
+                alert("Please choose a file to upload first.");
+            } else {
+                var fileObject = files[0];
+                var fileRequest = uploadMedia(albumName, fileObject, bar);
+                // wait for object to exist! then...
+                // requestPutObjectsTags(bucketName, filename, description, hashtags, function(data){
+                //     renderMediaTagging(filename, description, hashtags);
+                // });
 
-        if (!files.length) {
-            alert("Please choose a file to upload first.");
-        } else {
-            var fileObject = files[0];
-            var fileRequest = uploadMedia(albumName, fileObject, bar);
-            // wait for object to exist! then...
-            // requestPutObjectsTags(bucketName, filename, description, hashtags, function(data){
-            //     renderMediaTagging(filename, description, hashtags);
-            // });
+                $(thisModal).modal('hide');
+            }
+        });
 
-            $(thisModal).modal('hide');
-        }
+        thisModal.addEventListener("shown.bs.modal", function() {
+            thisModal.querySelector("#description").focus();
+        });
     });
 
-    // when opened, set focus to description field
-    thisModal.addEventListener("shown.bs.modal", function() {
-        thisModal.querySelector("#description").focus();
-    });
-
-    // open the upload form
-    $(thisModal).modal({ backdrop: false });
 }

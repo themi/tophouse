@@ -32,9 +32,7 @@ function listAlbums() {
             "Create New Album",
             "</button>"
         ];
-        document.getElementById("app").innerHTML = getHtml(htmlTemplate);
-        // how do you fire .tooltip(); without jquery notation?
-        $('[data-toggle="tooltip"]').tooltip();
+        renderPage(getHtml(htmlTemplate))
     });
 }
 
@@ -117,9 +115,7 @@ function viewAlbum(albumName) {
             'Back To Albums',
             '</button>'
         ];
-        document.getElementById("app").innerHTML = getHtml(htmlTemplate);
-        // how do you fire .tooltip(); without jquery notation?
-        $('[data-toggle="tooltip"]').tooltip();
+        renderPage(getHtml(htmlTemplate))
     });
 }
 
