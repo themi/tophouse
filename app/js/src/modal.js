@@ -147,7 +147,8 @@ function uploadMediaForm(albumName) {
                 //     renderMediaTagging(filename, description, hashtags);
                 // });
 
-                $(thisModal).modal('hide');
+                // [TODO] how to keep modal open until the file is uploaded
+                // $(thisModal).modal('hide');
             }
         });
 
