@@ -80,7 +80,9 @@ function mediaTagsForm(bucketName, filename, description, hashtags) {
         '</div>',
         '<div class="form-group">',
         '<label for="hashtags" class="col-form-label">Hashtags:</label>',
-        '<textarea class="form-control" id="hashtags" value="' + hashtags + '"></textarea>',
+        '<textarea class="form-control" id="hashtags">',
+        hashtags,
+        '</textarea>',
         '</div>',
         '</form>',
     ]);
