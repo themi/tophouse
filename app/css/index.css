@@ -7,3 +7,8 @@ video {
     left: 0;
 }
 
+.honeypot-field,
+.thankyou_message {
+    display: none;
+}
+

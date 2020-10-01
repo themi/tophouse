@@ -32,8 +32,14 @@ header.viewport {
 header h1,
 header h1 span,
 header h2 {
-    color: #FFFFEE;
     text-shadow: 2px 2px #000;
+}
+
+header h1,
+header h1 span,
+header h2,
+.info-text {
+    color: #FFFFEE;
     text-align: center;
 }
 
@@ -52,11 +58,6 @@ header h1>span {
 
 header form {
     display: inline-block !important;
-}
-
-header .honeypot-field,
-.thankyou_message {
-    display: none;
 }
 
 main {
