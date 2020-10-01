@@ -1,0 +1,132 @@
+html {
+    font-family: 'Open Sans', sans-serif;
+}
+
+html,
+body {
+    height: 91%;
+}
+
+/*           Font Smoothing      */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+.navbar,
+.brand {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+}
+
+header.viewport {
+    position: relative;
+    height: 100%;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+header h1,
+header h1 span,
+header h2 {
+    color: #FFFFEE;
+    text-shadow: 2px 2px #000;
+    text-align: center;
+}
+
+header h1 {
+    font-family: 'Berkshire Swash', cursive;
+    line-height: 1.2;
+    font-size: 5vw;
+    margin: 100px 0 150px 0;
+}
+
+header h1>span {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1;
+    font-size: 2.5vw;
+}
+
+header form {
+    display: inline-block !important;
+}
+
+header .honeypot-field,
+.thankyou_message {
+    display: none;
+}
+
+main {
+    background: rgba(black, 0.66);
+    color: white;
+    position: relative;
+    padding: 1rem;
+}
+
+.navbar-transparent {
+    background: transparent;
+    z-index: 99;
+}
+
+.shader {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    background-color: rgba(35, 3, 2, 0.66);
+}
+
+footer {
+    position: relative;
+    width: 100%;
+    color: #AAAAAA;
+    text-align: right;
+}
+
+footer a {
+    color: #FFFFFF;
+}
+
+footer .heart {
+    color: #FF3B30;
+}
+
+
+
+/* If the screen size is 601px wide or more, set the font-size of <div> to 80px */
+/*@media screen and (min-width: 601px) {
+  .main .logo {
+    font-size: 82px;
+  }
+  .main .motto {
+    font-size: 2.1em;
+  }
+  .main .info-text {
+    font-size: 1.6em;
+  }
+  .footer {
+    font-size: 14px;
+  }
+}
+*/
+/* If the screen size is 600px wide or less, set the font-size of <div> to 30px */
+/*@media screen and (max-width: 600px) {
+  .main .logo {
+    font-size: 62px;
+  }
+  .main .motto {
+    font-size: 1.6em;
+  }
+  .main .info-text {
+    font-size: 1.1em;
+  }
+  .footer {
+    font-size: 10px;
+  }
+}
+*/

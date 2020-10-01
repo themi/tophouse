@@ -9,7 +9,8 @@
     <title>Top House (Martin Road)</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Open+Sans&display=swap">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/tophouse.css" />
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/common.css" />
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
@@ -54,46 +55,52 @@
             </ul>
         </div>
     </nav>
-    <div class="main" style="background-image: url('images/default.jpg');">
-        <div class="cover red"></div>
+
+    <video class="full-page" src="https://hemi-uploads.s3-ap-southeast-2.amazonaws.com/Videos/BeforeShot133MartinRoadA.mp4" autoplay loop playsinline muted></video>
+
+    <div class="shader"></div>
+
+    <header class="viewport">
+        <h1>
+            Coming Soon</br>
+            <span>We are refurbushing Nana and Pop's place on Martin Road</span>
+        </h1>
+
         <div class="container">
-            <h1 class="logo cursive">
-                Coming Soon
-            </h1>
-            <h2 class="motto">We are refurbushing Nana and Pop's place on Martin Road</h2>
-            <div class="subscribe">
-                <h3 class="info-text">
-                    Keep me posted.
-                </h3>
-                <div class="row">
-                    <div class="col-md-4"></div>
-                    <div class="col-md-4">
-                        <form class="form-inline center" method="post" action="https://script.google.com/macros/s/AKfycbx52Oe5d7S6aH1Vt-RbtFVSRgf0C4bcAH8atdczq7_dnVDrVCmw/exec" role="form">
-                            <div class="form-group">
-                                <label class="sr-only" for="exampleInputEmail2">Email address</label>
-                                <input type="email" name="email" class="form-control transparent" placeholder="Your email here...">
-                            </div>
-                            <input type="hidden" name="subject" value="KEEP_ME_POSTED">
-                            <input type="hidden" name="message" value="Send by comming soon website form">
-                            <div class="honeypot-field">
-                                <label for="honeypot">To help avoid spam, utilize a Honeypot technique with a hidden text field; must be empty to submit the form! Otherwise, we assume the user is a spam bot.</label>
-                                <input id="honeypot" type="text" name="honeypot" value="" />
-                            </div>
-                            <button type="submit" class="btn btn-danger btn-fill">Notify Me</button>
-                            <div class="info-text thankyou_message">
-                                <h4><em>Thanks</em> for contacting us!</h4>
-                            </div>
-                        </form>
+            <h2>Keep me posted.</h2>
+
+            <form class="form-inline center" method="post" action="https://script.google.com/macros/s/AKfycbx52Oe5d7S6aH1Vt-RbtFVSRgf0C4bcAH8atdczq7_dnVDrVCmw/exec" role="form">
+                <input type="hidden" name="subject" value="KEEP_ME_POSTED">
+                <input type="hidden" name="message" value="Send by comming soon website form">
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputEmail2">Email address</label>
+                    <input type="email" name="email" class="form-control transparent" placeholder="Your email here...">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-danger">Notify Me</button>
                     </div>
                 </div>
-            </div>
+                <div class="honeypot-field">
+                    <label for="honeypot">To help avoid spam, utilize a Honeypot technique with a hidden text field; must be empty to submit the form! Otherwise, we assume the user is a spam bot.</label>
+                    <input id="honeypot" type="text" name="honeypot" value="" />
+                </div>
+                <div class="info-text thankyou_message">
+                    <h4><em>Thanks</em> for contacting us!</h4>
+                </div>
+            </form>
         </div>
-        <div class="footer">
+    </header>
+
+    <main>
+        <div class="container"></div>
+
+        <footer>
             <div class="container-fluid">
                 Made with <i class="fas fa-heart heart"></i> by <a href="#">Timmy</a>
             </div>
-        </div>
-    </div>
+        </footer>
+    </main>
+
     <script data-cfasync="false" src="js/form-submission-handler.js"></script>
 </body>
+
 </html>
