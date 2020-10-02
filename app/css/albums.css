@@ -1,9 +1,24 @@
-img.thumbnail {
+video.full-page,
+figure video,
+img.thumbnail,
+img.full-page {
     border-radius: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 5px;
+}
+
+figure video {
+    width: 180px;
+}
+
+img.thumbnail {
     width: 110px;
+}
+
+video.full-page,
+img.full-page {
+    max-width: 750px;
 }
 
 ul.albums > li {
@@ -21,14 +36,6 @@ figcaption {
 .image-container {
     display: flex;
     flex-flow: row wrap;
-}
-
-figure video {
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 5px;
-    width: 180px;
 }
 
 .image-slide {

@@ -1,13 +1,15 @@
-function renderPage(page, callaback) {
+function renderPage(page, callback) {
     document.getElementById("app").innerHTML = page;
-    callaback;
+    if (callback != null) callback();
+
     $('[data-toggle="tooltip"]').tooltip();
 }
 
 function renderModal(id, page, callback) {
     document.getElementById("modals").innerHTML = page;
     var thisModal = document.getElementById(id);
-    callback(thisModal);
+    if (callback != null) callback(thisModal);
+
     $('[data-toggle="tooltip"]').tooltip();
     $(thisModal).modal({ backdrop: false });
 }
@@ -24,6 +26,24 @@ function assertFileName(el) {
 //********************
 // START TEMPLATE AREA
 //********************
+
+function modalDisplay(id, header, body) {
+    const htmlString = getHtml([
+        '<div class="modal fade" tabindex="-1" role="dialog" id="' + id + '" >',
+        '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">',
+        '<div class="modal-content">',
+        '<div class="modal-header bg-dark text-light">',
+        header,
+        '</div>',
+        '<div class="modal-body">',
+        body,
+        '</div>',
+        '</div>',
+        '</div>',
+        '</div>'
+    ]);
+    return htmlString;
+}
 
 function modalBase(id, header, body, footer) {
     const htmlString = getHtml([
@@ -57,12 +77,14 @@ function modalDefaultHeader(title) {
 }
 
 function modalDefaultFooter(saveText) {
-    if (saveText == null) saveText = "Save changes";
-    const htmlString = getHtml([
-        '<button type="button" class="btn btn-primary modal-save-button">' + saveText + '</button>',
-        '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>',
-    ]);
-    return htmlString;
+    const htmlArray = [];
+
+    if (saveText != null) {
+        htmlArray.push('<button type="button" class="btn btn-primary modal-save-button">' + saveText + '</button>');
+    }
+    htmlArray.push('<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+
+    return getHtml(htmlArray);
 }
 
 
@@ -70,6 +92,11 @@ function modalDefaultFooter(saveText) {
 // START CUSTOM PAGES
 //*******************
 
+function zoomImageForm(mediaObject) {
+    const id = "zoom_image_dialog";
+    const dialogString = modalDisplay(id, modalDefaultHeader("Media Viewer"), mediaObject.outerHTML);
+    renderModal(id, dialogString);
+}
 
 function mediaTagsForm(bucketName, filename, description, hashtags) {
     const context = getHtml([
@@ -87,7 +114,7 @@ function mediaTagsForm(bucketName, filename, description, hashtags) {
         '</form>',
     ]);
     const id = "media_tags_dialog"
-    const dialogString = modalBase(id, modalDefaultHeader('Media Tags'), context, modalDefaultFooter());
+    const dialogString = modalBase(id, modalDefaultHeader('Media Tags'), context, modalDefaultFooter('Save Changes'));
 
     renderModal(id, dialogString, function(thisModal){
 
@@ -99,7 +126,7 @@ function mediaTagsForm(bucketName, filename, description, hashtags) {
         });
 
         thisModal.addEventListener('shown.bs.modal', function() {
-            thisModal.querySelector('#description').trigger('focus')
+            thisModal.querySelector('#description').trigger('focus');
         });
     });
 }

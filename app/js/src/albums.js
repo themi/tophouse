@@ -80,8 +80,9 @@ function viewAlbum(albumName) {
                 "<figcaption>",
                 mediaFileName.replace(albumMediaKey, ""),
                 "</figcaption>",
-                '<span id="media_' + keyToId(mediaFileName) + '"></span>',
+                '<span id="media_' + keyToId(mediaFileName) + '">',
                 createMediaHtml(albumBucketName, mediaFileName, mediaUrl),
+                '</span>',
                 "</figure>",
                 "<button onclick=\"deleteMedia('" + albumName + "','" + mediaFileName + "')\" class='btn btn-danger media-btn'>",
                 "<i class='fas fa-trash'></i>",
@@ -91,6 +92,9 @@ function viewAlbum(albumName) {
                 "</button>",
                 "<button onclick=\"editMediaTagging('" + albumName + "','" + mediaFileName + "')\" id='hashtags_" + keyToId(mediaFileName) + "' data-toggle='tooltip' data-placement='top' class='btn btn-info media-btn'>",
                 "<i class='fas fa-hashtag'></i>",
+                "</button>",
+                "<button onclick=\"zoomMedia('" + mediaFileName + "')\" class='btn btn-info media-btn'>",
+                "<i class='fas fa-search'></i>",
                 "</button>",
                 "</div>"
             ]);
@@ -175,4 +179,12 @@ function editMediaTagging(bucketName, filename) {
 function renderMediaTagging(filename, description, hashtags) {
     document.getElementById("description_" + keyToId(filename)).setAttribute("data-original-title", description);
     document.getElementById("hashtags_" + keyToId(filename)).setAttribute("data-original-title", hashtags);
+}
+
+function zoomMedia(filename) {
+    var el = document.getElementById("media_" + keyToId(filename));
+    var media = el.firstChild.cloneNode(true);
+    media.classList.remove('thumbnail');
+    media.classList.add('full-page');
+    zoomImageForm(media);
 }
