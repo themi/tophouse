@@ -47,7 +47,6 @@ header h1 {
     font-family: 'Berkshire Swash', cursive;
     line-height: 1.2;
     font-size: 5vw;
-    margin: 100px 0 150px 0;
 }
 
 header h1>span {
@@ -83,6 +82,7 @@ main {
 }
 
 footer {
+    pointer-events: none;
     position: relative;
     width: 100%;
     color: #AAAAAA;
