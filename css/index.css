@@ -15,3 +15,7 @@ video {
 header h1 {
     margin: 100px 0 150px 0;
 }
+
+.img-thumbnail {
+    width: 150px;
+}
